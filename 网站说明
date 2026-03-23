@@ -1,0 +1,11 @@
+推送结果： 10个文件已提交并推送到 rao5201/openclaw.ai 仓库，包括：
+
+index.html — 完整前端（1,052行），含Supabase集成 + localStorage双模式 + 管理后台
+database/schema.sql — 5张数据表 + RLS安全策略
+database/seed.sql — 初始数据（8技能、18广告位、站点设置）
+api/ — 4个Vercel Serverless API端点（skills、ad-slots、contacts、supabase-client）
+vercel.json + package.json — 部署配置
+database/README_SETUP.txt — Supabase配置指南
+网站已上线： https://rao5201.github.io/openclaw.ai/
+
+GitHub Pages 部署通常需要1-2分钟生效。管理后台密码：openclaw2026
