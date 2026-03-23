@@ -1,463 +1,1052 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenClaw AI - 本地AI助手平台</title>
-  <meta name="description" content="OpenClaw是开源本地AI助手，支持多模型、全系统操作、技能扩展，本地部署隐私可控。">
-  <meta name="keywords" content="OpenClaw, AI助手, 本地AI, 自动化, 代码生成">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --secondary: #8b5cf6;
-      --accent: #06b6d4;
-      --bg-dark: #0f172a;
-      --bg-card: #1e293b;
-      --text-light: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #334155;
-      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-light);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-    ul {
-      list-style: none;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    /* 顶部悬浮广告位（可点击跳转表单） */
-    .top-banner {
-      background: #ff4444;
-      color: #fff;
-      text-align: center;
-      padding: 12px 0;
-      font-weight: 600;
-      font-size: 15px;
-      position: sticky;
-      top: 0;
-      z-index: 999;
-      cursor: pointer;
-    }
-    .top-banner a {
-      color: #fff;
-      text-decoration: underline;
-      margin-left: 8px;
-    }
-
-    /* 导航栏 */
-    .navbar {
-      padding: 1.5rem 0;
-      border-bottom: 1px solid var(--border);
-      background-color: rgba(15, 23, 42, 0.9);
-      backdrop-filter: blur(10px);
-      z-index: 100;
-    }
-    .nav-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary);
-    }
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-    }
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-    }
-    .nav-link {
-      font-weight: 500;
-      color: var(--text-muted);
-      transition: color 0.3s ease;
-    }
-    .nav-link:hover {
-      color: var(--primary);
-    }
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      border: none;
-      font-size: 1rem;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-
-    /* Hero区 */
-    .hero {
-      padding: 6rem 0;
-      text-align: center;
-    }
-    .hero-title {
-      font-size: 3.5rem;
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .hero-subtitle {
-      font-size: 1.25rem;
-      color: var(--text-muted);
-      max-width: 700px;
-      margin: 0 auto 3rem;
-    }
-    .hero-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .btn-outline {
-      background: transparent;
-      border: 2px solid var(--primary);
-      color: var(--primary);
-    }
-    .btn-outline:hover {
-      background: var(--primary);
-      color: white;
-    }
-
-    /* 功能区 */
-    .features {
-      padding: 4rem 0;
-    }
-    .section-title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 4rem;
-    }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-    }
-    .feature-card {
-      background-color: var(--bg-card);
-      padding: 2rem;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .feature-card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--shadow);
-    }
-    .feature-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-      font-size: 1.25rem;
-    }
-    .feature-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
-    .feature-desc {
-      color: var(--text-muted);
-      line-height: 1.7;
-    }
-
-    /* 广告位登记表单 */
-    .ad-form-section {
-      padding: 60px 0;
-      background: #1a1a2e;
-      border-top: 1px solid #333;
-    }
-    .form-title {
-      text-align: center;
-      font-size: 26px;
-      margin-bottom: 10px;
-      color: #fff;
-    }
-    .form-desc {
-      text-align: center;
-      color: #ccc;
-      margin-bottom: 40px;
-    }
-    .ad-form {
-      max-width: 700px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .ad-form input,
-    .ad-form select,
-    .ad-form textarea {
-      padding: 14px;
-      border-radius: 8px;
-      border: 1px solid #444;
-      background: #111;
-      color: #fff;
-      font-size: 15px;
-    }
-    .ad-form button {
-      padding: 16px;
-      background: #ff4444;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .ad-form button:hover {
-      background: #e03333;
-    }
-
-    /* 底部18个广告位 6×3 */
-    .ad-section {
-      padding: 60px 0;
-      background: #111;
-      border-top: 1px solid #333;
-      text-align: center;
-    }
-    .ad-title {
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: #fff;
-    }
-    .ad-contact {
-      font-size: 16px;
-      color: #ff4444;
-      margin-bottom: 40px;
-      font-weight: 600;
-    }
-    .ad-contact a {
-      color: #ff4444;
-      text-decoration: underline;
-    }
-    .ad-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      grid-template-rows: repeat(3, 120px);
-      gap: 10px;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 10px;
-    }
-    .ad-item {
-      background: #222;
-      border: 1px dashed #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #999;
-      font-size: 13px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .ad-item:hover {
-      background: #333;
-      color: #ff4444;
-    }
-
-    /* 页脚 */
-    .footer {
-      padding: 3rem 0;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      color: var(--text-muted);
-    }
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .footer-link {
-      transition: color 0.3s ease;
-    }
-    .footer-link:hover {
-      color: var(--primary);
-    }
-    .copyright {
-      font-size: 0.875rem;
-    }
-
-    /* 响应式 */
-    @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2.5rem;
-      }
-      .section-title {
-        font-size: 2rem;
-      }
-      .nav-links {
-        display: none;
-      }
-      .ad-grid {
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: repeat(6, 100px);
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw AI - 能干活的本地AI助手</title>
+<meta name="description" content="OpenClaw AI 是开源本地AI助手平台，支持多模型、全系统操作、技能扩展、本地部署与隐私控制。">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#6366f1',
+        'primary-dark': '#4f46e5',
+        secondary: '#8b5cf6',
+        accent: '#06b6d4',
+        'bg-dark': '#0f172a',
+        'bg-card': '#1e293b',
+        'text-light': '#f8fafc',
+        'text-muted': '#94a3b8',
+        border: '#334155',
+      },
+      fontFamily: {
+        inter: ['Inter', 'sans-serif'],
       }
     }
-  </style>
+  }
+}
+</script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; }
+
+/* Glass effect */
+.glass { background: rgba(30,41,59,0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(51,65,85,0.5); }
+
+/* Gradient text */
+.gradient-text { background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* Primary gradient button */
+.btn-primary-gradient { background: linear-gradient(135deg, #6366f1, #8b5cf6); transition: all 0.3s; }
+.btn-primary-gradient:hover { background: linear-gradient(135deg, #4f46e5, #7c3aed); transform: translateY(-1px); box-shadow: 0 8px 25px rgba(99,102,241,0.4); }
+
+/* Card hover */
+.card-hover { transition: all 0.3s ease; }
+.card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); border-color: #6366f1; }
+
+/* Terminal animation */
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.cursor-blink { animation: blink 1s infinite; }
+
+@keyframes typewriter { from{width:0} to{width:100%} }
+.type-line { overflow: hidden; white-space: nowrap; animation: typewriter 1.5s steps(40) forwards; }
+.type-line-2 { animation-delay: 1.5s; opacity:0; animation: typewriter 1.5s steps(40) 1.5s forwards, fadeIn 0.1s 1.5s forwards; }
+.type-line-3 { animation-delay: 3s; opacity:0; animation: typewriter 2s steps(50) 3s forwards, fadeIn 0.1s 3s forwards; }
+@keyframes fadeIn { to{opacity:1} }
+
+/* Fade in on scroll */
+.fade-in { opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* Toast */
+.toast { position:fixed; top:100px; right:20px; z-index:9999; padding:16px 24px; border-radius:12px; color:#fff; font-weight:500; transform:translateX(120%); transition:transform 0.4s ease; }
+.toast.show { transform:translateX(0); }
+.toast-success { background: linear-gradient(135deg, #10b981, #059669); }
+.toast-error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.toast-info { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+
+/* Ad slot styles */
+.ad-slot-available { border: 2px dashed #334155; cursor:pointer; transition: all 0.3s; }
+.ad-slot-available:hover { border-color: #6366f1; background: rgba(99,102,241,0.05); }
+.ad-slot-taken { border: 2px solid #10b981; background: rgba(16,185,129,0.08); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:#0f172a; }
+::-webkit-scrollbar-thumb { background:#334155; border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:#475569; }
+
+/* Admin tabs */
+.admin-tab { padding:10px 20px; cursor:pointer; border-bottom:2px solid transparent; transition:all 0.3s; color:#94a3b8; }
+.admin-tab.active { border-bottom-color:#6366f1; color:#f8fafc; }
+.admin-tab:hover { color:#f8fafc; }
+
+/* Code block */
+.code-block { position:relative; background:#0f172a; border:1px solid #334155; border-radius:8px; padding:16px 48px 16px 16px; font-family:'Courier New',monospace; font-size:14px; overflow-x:auto; }
+.copy-btn { position:absolute; top:8px; right:8px; background:#334155; border:none; color:#94a3b8; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:12px; transition:all 0.2s; }
+.copy-btn:hover { background:#475569; color:#f8fafc; }
+
+/* Mobile menu */
+.mobile-menu { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+.mobile-menu.open { max-height:400px; }
+
+/* Stat counter animation */
+@keyframes countUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* DB mode badge */
+#dbBadge { position:fixed; bottom:20px; right:20px; z-index:100; padding:8px 14px; border-radius:20px; font-size:12px; font-weight:600; }
+</style>
 </head>
 <body>
 
-  <!-- 顶部悬浮广告位（可点击跳转表单） -->
-  <div class="top-banner" onclick="document.getElementById('adForm').scrollIntoView({behavior:'smooth'})">
-    广告位报价：10万元/位/月份
-    <a href="#adForm">招商联系：rao5201@126.com</a>
+<!-- Toast container -->
+<div id="toastContainer"></div>
+
+<!-- DB Mode Badge -->
+<div id="dbBadge" class="bg-bg-card border border-border text-text-muted">
+  <i class="fas fa-database mr-1"></i> <span id="dbModeText">localStorage</span>
+</div>
+
+<!-- ===== 1. TOP BANNER ===== -->
+<div id="topBanner" class="sticky top-0 z-50 bg-[#ff4444] text-white text-center py-2.5 px-4 text-sm font-medium cursor-pointer" onclick="document.getElementById('adForm').scrollIntoView({behavior:'smooth'})">
+  <span>&#x1F525; 广告位火热招商中 · 10万元/位/月 · 联系: rao5201@126.com</span>
+  <button onclick="event.stopPropagation();closeBanner()" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white text-lg font-bold" aria-label="关闭">&times;</button>
+</div>
+
+<!-- ===== 2. NAVIGATION ===== -->
+<nav id="mainNav" class="sticky top-[42px] z-40 glass transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-2 text-xl font-bold text-text-light">
+        <span class="text-2xl">&#x1F99E;</span> OpenClaw AI
+      </a>
+      <!-- Desktop links -->
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#features" class="text-text-muted hover:text-text-light transition">功能</a>
+        <a href="#skills" class="text-text-muted hover:text-text-light transition">技能市场</a>
+        <a href="#deploy" class="text-text-muted hover:text-text-light transition">文档</a>
+        <a href="#adSection" class="text-text-muted hover:text-text-light transition">广告招商</a>
+        <a href="#" onclick="event.preventDefault();showAdmin()" class="text-text-muted hover:text-text-light transition">管理后台</a>
+      </div>
+      <!-- Deploy button -->
+      <div class="hidden md:block">
+        <a href="#deploy" class="btn-primary-gradient text-white px-5 py-2.5 rounded-lg text-sm font-semibold inline-block">立即部署</a>
+      </div>
+      <!-- Mobile hamburger -->
+      <button onclick="toggleMobileMenu()" class="md:hidden text-text-muted hover:text-text-light text-xl" aria-label="菜单">
+        <i class="fas fa-bars" id="menuIcon"></i>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="mobile-menu md:hidden pb-4">
+      <div class="flex flex-col gap-3 pt-2">
+        <a href="#features" onclick="toggleMobileMenu()" class="text-text-muted hover:text-text-light transition px-2 py-1">功能</a>
+        <a href="#skills" onclick="toggleMobileMenu()" class="text-text-muted hover:text-text-light transition px-2 py-1">技能市场</a>
+        <a href="#deploy" onclick="toggleMobileMenu()" class="text-text-muted hover:text-text-light transition px-2 py-1">文档</a>
+        <a href="#adSection" onclick="toggleMobileMenu()" class="text-text-muted hover:text-text-light transition px-2 py-1">广告招商</a>
+        <a href="#" onclick="event.preventDefault();showAdmin();toggleMobileMenu()" class="text-text-muted hover:text-text-light transition px-2 py-1">管理后台</a>
+        <a href="#deploy" onclick="toggleMobileMenu()" class="btn-primary-gradient text-white px-5 py-2.5 rounded-lg text-sm font-semibold text-center mt-2">立即部署</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== 3. HERO SECTION ===== -->
+<section class="relative overflow-hidden pt-20 pb-24 px-4">
+  <!-- Background decoration -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl"></div>
   </div>
 
-  <!-- 导航栏 -->
-  <nav class="navbar">
-    <div class="container nav-container">
-      <a href="#" class="logo">
-        <div class="logo-icon">🦞</div>
-        OpenClaw AI
-      </a>
-      <ul class="nav-links">
-        <li><a href="#features">功能</a></li>
-        <li><a href="#adForm">广告招商</a></li>
-        <li><a href="https://github.com" target="_blank">GitHub</a></li>
-      </ul>
-      <button class="btn btn-primary" onclick="document.getElementById('adForm').scrollIntoView({behavior:'smooth'})">广告投放</button>
-    </div>
-  </nav>
+  <div class="max-w-7xl mx-auto relative z-10">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <!-- Left: Text -->
+      <div class="text-center lg:text-left">
+        <div class="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
+          &#x1F680; 开源 · 本地部署 · 隐私优先
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-6">
+          <span class="gradient-text">能干活的</span><br>
+          <span class="gradient-text">本地AI助手</span>
+        </h1>
+        <p class="text-text-muted text-lg sm:text-xl leading-relaxed mb-8 max-w-xl mx-auto lg:mx-0">
+          OpenClaw AI 支持多模型（Claude/GPT/Qwen）本地运行，全系统操作，100+技能模块，数据永不离开你的设备。
+        </p>
+        <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
+          <a href="#deploy" class="btn-primary-gradient text-white px-8 py-3.5 rounded-xl text-base font-semibold inline-flex items-center gap-2">
+            <i class="fas fa-rocket"></i> 立即部署
+          </a>
+          <a href="https://github.com/openclaw-ai" target="_blank" class="border border-border text-text-light px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-white/5 transition inline-flex items-center gap-2">
+            <i class="fab fa-github"></i> GitHub
+          </a>
+          <a href="#adForm" class="border border-[#ff4444] text-[#ff4444] px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-[#ff4444]/10 transition inline-flex items-center gap-2">
+            <i class="fas fa-bullhorn"></i> 广告合作
+          </a>
+        </div>
+      </div>
 
-  <!-- Hero区 -->
-  <section class="hero">
-    <div class="container">
-      <h1 class="hero-title">能干活的本地AI助手</h1>
-      <p class="hero-subtitle">OpenClaw是开源本地AI智能体，支持多模型、全系统操作、技能扩展，本地部署隐私可控，7×24小时为你自动化工作。</p>
-      <div class="hero-buttons">
-        <button class="btn btn-primary">立即部署</button>
-        <button class="btn btn-outline" onclick="document.getElementById('adForm').scrollIntoView({behavior:'smooth'})">广告合作</button>
+      <!-- Right: Terminal -->
+      <div class="relative">
+        <div class="bg-bg-card border border-border rounded-2xl overflow-hidden shadow-2xl">
+          <!-- Terminal header -->
+          <div class="flex items-center gap-2 px-4 py-3 bg-[#0f172a] border-b border-border">
+            <div class="w-3 h-3 rounded-full bg-[#ff5f57]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#febc2e]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#28c840]"></div>
+            <span class="text-text-muted text-xs ml-2 font-mono">openclaw-terminal</span>
+          </div>
+          <!-- Terminal body -->
+          <div class="p-5 font-mono text-sm leading-7 min-h-[200px]">
+            <div class="type-line">
+              <span class="text-accent">$</span> <span class="text-text-light">openclaw run "帮我分析这个月的销售数据"</span>
+            </div>
+            <div class="type-line-2 text-yellow-400 mt-2">
+              &#x1F99E; OpenClaw: 正在分析 sales_2026.xlsx...
+            </div>
+            <div class="type-line-3 text-green-400 mt-2">
+              &#x2705; 发现3个关键趋势，已生成报告 → report.pdf
+            </div>
+            <div class="mt-4 opacity-0" style="animation:fadeIn 0.1s 5s forwards">
+              <span class="text-accent">$</span> <span class="cursor-blink text-text-light">|</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
 
-  <!-- 功能区 -->
-  <section class="features" id="features">
-    <div class="container">
-      <h2 class="section-title">核心能力</h2>
-      <div class="features-grid">
-        <div class="feature-card"><div class="feature-icon">💻</div><h3 class="feature-title">本地运行</h3><p class="feature-desc">支持Windows、macOS、Linux，兼容Claude、GPT、Qwen等多模型，数据不离开设备，隐私安全。</p></div>
-        <div class="feature-card"><div class="feature-icon">⚙️</div><h3 class="feature-title">全系统操作</h3><p class="feature-desc">读写文件、执行脚本、操控浏览器、填写表单，拥有完整计算机操作能力。</p></div>
-        <div class="feature-card"><div class="feature-icon">🧩</div><h3 class="feature-title">技能扩展</h3><p class="feature-desc">ClawHub技能市场提供100+模块，一键安装扩展功能，也可自定义开发。</p></div>
-        <div class="feature-card"><div class="feature-icon">🔄</div><h3 class="feature-title">主动工作</h3><p class="feature-desc">定时任务、后台监控、异常预警，主动发现问题并汇报，无需手动触发。</p></div>
-        <div class="feature-card"><div class="feature-icon">📝</div><h3 class="feature-title">代码生成</h3><p class="feature-desc">自然语言描述需求，自动生成HTML/CSS/JS、后端代码，一键部署上线。</p></div>
-        <div class="feature-card"><div class="feature-icon">🤝</div><h3 class="feature-title">多平台交互</h3><p class="feature-desc">支持微信、飞书、Telegram、Discord等，随时随地指挥AI工作。</p></div>
+    <!-- Stats bar -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+      <div class="text-center p-6 bg-bg-card/50 rounded-xl border border-border/50">
+        <div class="text-3xl font-bold gradient-text">100+</div>
+        <div class="text-text-muted text-sm mt-1">技能模块</div>
+      </div>
+      <div class="text-center p-6 bg-bg-card/50 rounded-xl border border-border/50">
+        <div class="text-3xl font-bold gradient-text">10,000+</div>
+        <div class="text-text-muted text-sm mt-1">用户</div>
+      </div>
+      <div class="text-center p-6 bg-bg-card/50 rounded-xl border border-border/50">
+        <div class="text-3xl font-bold gradient-text">99.9%</div>
+        <div class="text-text-muted text-sm mt-1">可用性</div>
+      </div>
+      <div class="text-center p-6 bg-bg-card/50 rounded-xl border border-border/50">
+        <div class="text-3xl font-bold gradient-text">7&times;24</div>
+        <div class="text-text-muted text-sm mt-1">主动工作</div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- 广告位信息登记表单（自动发邮件） -->
-  <section class="ad-form-section" id="adForm">
-    <div class="container">
-      <h2 class="form-title">广告位信息登记</h2>
-      <p class="form-desc">填写后自动发送邮件至 rao5201@126.com，我们将尽快与您联系</p>
-      <form class="ad-form" action="mailto:rao5201@126.com" method="get" enctype="text/plain">
-        <input type="text" name="公司名称" placeholder="请输入公司/品牌名称" required>
-        <input type="text" name="联系人" placeholder="联系人姓名" required>
-        <input type="tel" name="联系电话" placeholder="联系电话" required>
-        <input type="email" name="联系邮箱" placeholder="联系邮箱" required>
-        <select name="广告位置" required>
-          <option value="">请选择广告位置</option>
-          <option value="顶部悬浮广告位">顶部悬浮广告位（10万/月）</option>
-          <option value="底部广告位1-18号">底部广告位1-18号</option>
-        </select>
-        <input type="text" name="投放时长" placeholder="投放时长（月）">
-        <textarea name="广告需求" rows="4" placeholder="广告需求/备注信息"></textarea>
-        <button type="submit">提交登记 · 自动发送邮件</button>
-      </form>
+<!-- ===== 4. CORE FEATURES ===== -->
+<section id="features" class="py-24 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 fade-in">
+      <h2 class="text-3xl sm:text-4xl font-bold mb-4">核心<span class="gradient-text">功能</span></h2>
+      <p class="text-text-muted text-lg max-w-2xl mx-auto">全方位本地AI助手能力，让AI真正为你干活</p>
     </div>
-  </section>
-
-  <!-- 底部18个广告位（全部可点击跳转表单） -->
-  <section class="ad-section">
-    <div class="container">
-      <h2 class="ad-title">网站广告位招商</h2>
-      <div class="ad-contact">
-        <a href="#adForm">招商联系：rao5201@126.com</a>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Feature 1 -->
+      <div class="bg-bg-card border border-border rounded-2xl p-8 card-hover fade-in">
+        <div class="text-4xl mb-4">&#x1F4BB;</div>
+        <h3 class="text-xl font-bold mb-3 text-text-light">本地运行</h3>
+        <p class="text-text-muted leading-relaxed">支持 Windows/macOS/Linux，兼容 Claude/GPT/Qwen 多模型，数据不离开设备，隐私完全可控。</p>
       </div>
-      <div class="ad-grid" onclick="document.getElementById('adForm').scrollIntoView({behavior:'smooth'})">
-        <div class="ad-item">广告位 1</div><div class="ad-item">广告位 2</div><div class="ad-item">广告位 3</div><div class="ad-item">广告位 4</div><div class="ad-item">广告位 5</div><div class="ad-item">广告位 6</div>
-        <div class="ad-item">广告位 7</div><div class="ad-item">广告位 8</div><div class="ad-item">广告位 9</div><div class="ad-item">广告位 10</div><div class="ad-item">广告位 11</div><div class="ad-item">广告位 12</div>
-        <div class="ad-item">广告位 13</div><div class="ad-item">广告位 14</div><div class="ad-item">广告位 15</div><div class="ad-item">广告位 16</div><div class="ad-item">广告位 17</div><div class="ad-item">广告位 18</div>
+      <!-- Feature 2 -->
+      <div class="bg-bg-card border border-border rounded-2xl p-8 card-hover fade-in">
+        <div class="text-4xl mb-4">&#x2699;&#xFE0F;</div>
+        <h3 class="text-xl font-bold mb-3 text-text-light">全系统操作</h3>
+        <p class="text-text-muted leading-relaxed">读写文件、执行脚本、操控浏览器、填写表单，真正具备系统级操作能力的AI助手。</p>
+      </div>
+      <!-- Feature 3 -->
+      <div class="bg-bg-card border border-border rounded-2xl p-8 card-hover fade-in">
+        <div class="text-4xl mb-4">&#x1F9E9;</div>
+        <h3 class="text-xl font-bold mb-3 text-text-light">技能扩展</h3>
+        <p class="text-text-muted leading-relaxed">ClawHub 技能市场 100+ 模块，一键安装。支持自定义技能开发与分享。</p>
+      </div>
+      <!-- Feature 4 -->
+      <div class="bg-bg-card border border-border rounded-2xl p-8 card-hover fade-in">
+        <div class="text-4xl mb-4">&#x1F504;</div>
+        <h3 class="text-xl font-bold mb-3 text-text-light">主动工作</h3>
+        <p class="text-text-muted leading-relaxed">定时任务、后台监控、异常预警，不需要你时刻关注，AI主动完成工作。</p>
+      </div>
+      <!-- Feature 5 -->
+      <div class="bg-bg-card border border-border rounded-2xl p-8 card-hover fade-in">
+        <div class="text-4xl mb-4">&#x1F4DD;</div>
+        <h3 class="text-xl font-bold mb-3 text-text-light">代码生成</h3>
+        <p class="text-text-muted leading-relaxed">自然语言生成 HTML/CSS/JS/后端代码，快速搭建原型，提升开发效率。</p>
+      </div>
+      <!-- Feature 6 -->
+      <div class="bg-bg-card border border-border rounded-2xl p-8 card-hover fade-in">
+        <div class="text-4xl mb-4">&#x1F91D;</div>
+        <h3 class="text-xl font-bold mb-3 text-text-light">多平台交互</h3>
+        <p class="text-text-muted leading-relaxed">无缝对接微信、飞书、Telegram、Discord，跨平台统一工作流。</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- 页脚 -->
-  <footer class="footer">
-    <div class="container">
-      <ul class="footer-links">
-        <li><a href="#adForm" class="footer-link">广告招商</a></li>
-        <li><a href="https://github.com" target="_blank">GitHub</a></li>
-        <li><a href="#">文档</a></li>
-        <li><a href="#">隐私政策</a></li>
-      </ul>
-      <p class="copyright">© 2026 OpenClaw AI | <a href="#adForm">广告位合作：rao5201@126.com</a></p>
+<!-- ===== 5. SKILL MARKETPLACE ===== -->
+<section id="skills" class="py-24 px-4 bg-[#0b1120]">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 fade-in">
+      <h2 class="text-3xl sm:text-4xl font-bold mb-4">ClawHub <span class="gradient-text">技能市场</span></h2>
+      <p class="text-text-muted text-lg max-w-2xl mx-auto">丰富的技能模块生态，一键安装即可扩展AI能力</p>
     </div>
-  </footer>
+    <div id="skillsGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</section>
 
-  <script>
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const t = document.querySelector(this.getAttribute('href'));
-        if(t) t.scrollIntoView({ behavior:'smooth' });
-      });
+<!-- ===== 6. DEPLOYMENT GUIDE ===== -->
+<section id="deploy" class="py-24 px-4">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-16 fade-in">
+      <h2 class="text-3xl sm:text-4xl font-bold mb-4">三步部署，<span class="gradient-text">即刻上手</span></h2>
+      <p class="text-text-muted text-lg">简单几步，本地AI助手开始为你工作</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Step 1 -->
+      <div class="bg-bg-card border border-border rounded-2xl p-8 card-hover fade-in text-center">
+        <div class="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xl font-bold mx-auto mb-5">1</div>
+        <h3 class="text-lg font-bold mb-4 text-text-light">下载安装</h3>
+        <div class="code-block text-left text-xs sm:text-sm">
+          <code class="text-green-400">curl -fsSL https://openclaw.ai/install.sh | bash</code>
+          <button class="copy-btn" onclick="copyToClipboard('curl -fsSL https://openclaw.ai/install.sh | bash',this)"><i class="fas fa-copy"></i></button>
+        </div>
+      </div>
+      <!-- Step 2 -->
+      <div class="bg-bg-card border border-border rounded-2xl p-8 card-hover fade-in text-center">
+        <div class="w-12 h-12 rounded-full bg-secondary/20 text-secondary flex items-center justify-center text-xl font-bold mx-auto mb-5">2</div>
+        <h3 class="text-lg font-bold mb-4 text-text-light">配置模型</h3>
+        <div class="code-block text-left text-xs sm:text-sm">
+          <code class="text-green-400">openclaw config --model claude-3.5</code>
+          <button class="copy-btn" onclick="copyToClipboard('openclaw config --model claude-3.5',this)"><i class="fas fa-copy"></i></button>
+        </div>
+      </div>
+      <!-- Step 3 -->
+      <div class="bg-bg-card border border-border rounded-2xl p-8 card-hover fade-in text-center">
+        <div class="w-12 h-12 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xl font-bold mx-auto mb-5">3</div>
+        <h3 class="text-lg font-bold mb-4 text-text-light">开始工作</h3>
+        <div class="code-block text-left text-xs sm:text-sm">
+          <code class="text-green-400">openclaw run "你的任务描述"</code>
+          <button class="copy-btn" onclick="copyToClipboard('openclaw run &quot;你的任务描述&quot;',this)"><i class="fas fa-copy"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 7. AD REGISTRATION FORM ===== -->
+<section id="adForm" class="py-24 px-4 bg-[#0b1120]">
+  <div class="max-w-2xl mx-auto">
+    <div class="text-center mb-12 fade-in">
+      <h2 class="text-3xl sm:text-4xl font-bold mb-4">广告位<span class="gradient-text">信息登记</span></h2>
+      <p class="text-text-muted text-lg">填写后自动保存，我们将尽快联系您</p>
+    </div>
+    <form id="adFormEl" onsubmit="submitAdForm(event)" class="bg-bg-card border border-border rounded-2xl p-8 space-y-5 fade-in">
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-sm font-medium text-text-muted mb-2">公司名称 <span class="text-red-400">*</span></label>
+          <input type="text" name="company" required class="w-full bg-[#0f172a] border border-border rounded-lg px-4 py-3 text-text-light focus:border-primary focus:outline-none transition" placeholder="请输入公司名称">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-muted mb-2">联系人 <span class="text-red-400">*</span></label>
+          <input type="text" name="contact" required class="w-full bg-[#0f172a] border border-border rounded-lg px-4 py-3 text-text-light focus:border-primary focus:outline-none transition" placeholder="请输入联系人姓名">
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-sm font-medium text-text-muted mb-2">联系电话 <span class="text-red-400">*</span></label>
+          <input type="tel" name="phone" required class="w-full bg-[#0f172a] border border-border rounded-lg px-4 py-3 text-text-light focus:border-primary focus:outline-none transition" placeholder="请输入联系电话">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-muted mb-2">联系邮箱 <span class="text-red-400">*</span></label>
+          <input type="email" name="email" required class="w-full bg-[#0f172a] border border-border rounded-lg px-4 py-3 text-text-light focus:border-primary focus:outline-none transition" placeholder="请输入联系邮箱">
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-sm font-medium text-text-muted mb-2">广告位置</label>
+          <select name="position" class="w-full bg-[#0f172a] border border-border rounded-lg px-4 py-3 text-text-light focus:border-primary focus:outline-none transition">
+            <option value="">请选择广告位置</option>
+            <option value="顶部横幅">顶部横幅</option>
+            <option value="首屏右侧">首屏右侧</option>
+            <option value="功能区间">功能区间</option>
+            <option value="技能市场旁">技能市场旁</option>
+            <option value="底部展示区">底部展示区</option>
+            <option value="任意位置">任意位置</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-text-muted mb-2">投放时长</label>
+          <select name="duration" class="w-full bg-[#0f172a] border border-border rounded-lg px-4 py-3 text-text-light focus:border-primary focus:outline-none transition">
+            <option value="1个月">1个月</option>
+            <option value="3个月">3个月</option>
+            <option value="6个月">6个月</option>
+            <option value="12个月">12个月</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-text-muted mb-2">广告需求 / 备注</label>
+        <textarea name="notes" rows="4" class="w-full bg-[#0f172a] border border-border rounded-lg px-4 py-3 text-text-light focus:border-primary focus:outline-none transition resize-none" placeholder="请描述您的广告需求或其他备注信息"></textarea>
+      </div>
+      <button type="submit" class="w-full bg-[#ff4444] hover:bg-[#e03e3e] text-white py-3.5 rounded-xl font-semibold text-base transition flex items-center justify-center gap-2">
+        <i class="fas fa-paper-plane"></i> 提交登记
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- ===== 8. 18 AD SLOTS ===== -->
+<section id="adSection" class="py-24 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-12 fade-in">
+      <h2 class="text-3xl sm:text-4xl font-bold mb-4">网站广告位<span class="gradient-text">招商</span></h2>
+      <p class="text-text-muted text-lg">联系: rao5201@126.com · 10万元/位/月</p>
+    </div>
+    <div id="adSlotsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ===== 9. ADMIN PANEL ===== -->
+<div id="adminOverlay" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4" style="display:none">
+  <div class="bg-bg-card border border-border rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+    <!-- Admin header -->
+    <div class="flex items-center justify-between p-6 border-b border-border">
+      <h2 class="text-xl font-bold text-text-light"><i class="fas fa-shield-halved text-primary mr-2"></i>管理后台</h2>
+      <button onclick="closeAdmin()" class="text-text-muted hover:text-text-light text-xl"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Admin Login -->
+    <div id="adminLogin" class="p-8 text-center">
+      <p class="text-text-muted mb-4">请输入管理员密码</p>
+      <div class="flex gap-3 max-w-sm mx-auto">
+        <input type="password" id="adminPwd" class="flex-1 bg-[#0f172a] border border-border rounded-lg px-4 py-3 text-text-light focus:border-primary focus:outline-none" placeholder="管理员密码" onkeydown="if(event.key==='Enter')adminAuth()">
+        <button onclick="adminAuth()" class="btn-primary-gradient text-white px-6 py-3 rounded-lg font-semibold">登录</button>
+      </div>
+    </div>
+
+    <!-- Admin Content (hidden until auth) -->
+    <div id="adminContent" class="hidden flex-1 overflow-hidden flex flex-col">
+      <!-- Tabs -->
+      <div class="flex border-b border-border px-6 overflow-x-auto">
+        <button class="admin-tab active" onclick="switchAdminTab('skills',this)">技能管理</button>
+        <button class="admin-tab" onclick="switchAdminTab('adslots',this)">广告位管理</button>
+        <button class="admin-tab" onclick="switchAdminTab('forms',this)">表单管理</button>
+        <button class="admin-tab" onclick="switchAdminTab('stats',this)">访客统计</button>
+      </div>
+      <!-- Tab content -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <!-- Skills Tab -->
+        <div id="adminTab-skills">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-semibold text-text-light">技能列表</h3>
+            <div class="flex gap-2">
+              <button onclick="addSkillPrompt()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-medium transition"><i class="fas fa-plus mr-1"></i>添加技能</button>
+              <button onclick="exportData()" class="bg-border hover:bg-[#475569] text-text-light px-4 py-2 rounded-lg text-sm font-medium transition"><i class="fas fa-download mr-1"></i>导出</button>
+              <button onclick="document.getElementById('importFile').click()" class="bg-border hover:bg-[#475569] text-text-light px-4 py-2 rounded-lg text-sm font-medium transition"><i class="fas fa-upload mr-1"></i>导入</button>
+              <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="text-text-muted border-b border-border">
+                <th class="text-left py-3 px-3">ID</th><th class="text-left py-3 px-3">图标</th><th class="text-left py-3 px-3">名称</th><th class="text-left py-3 px-3">描述</th><th class="text-left py-3 px-3">安装量</th><th class="text-left py-3 px-3">操作</th>
+              </tr></thead>
+              <tbody id="adminSkillsBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Ad Slots Tab -->
+        <div id="adminTab-adslots" class="hidden">
+          <h3 class="font-semibold text-text-light mb-4">广告位管理（共18个）</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead><tr class="text-text-muted border-b border-border">
+                <th class="text-left py-3 px-3">编号</th><th class="text-left py-3 px-3">位置</th><th class="text-left py-3 px-3">状态</th><th class="text-left py-3 px-3">广告主</th><th class="text-left py-3 px-3">操作</th>
+              </tr></thead>
+              <tbody id="adminAdSlotsBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Forms Tab -->
+        <div id="adminTab-forms" class="hidden">
+          <h3 class="font-semibold text-text-light mb-4">广告登记表单</h3>
+          <div id="adminFormsList" class="space-y-3"></div>
+        </div>
+        <!-- Stats Tab -->
+        <div id="adminTab-stats" class="hidden">
+          <h3 class="font-semibold text-text-light mb-6">访客统计</h3>
+          <div class="grid sm:grid-cols-3 gap-6">
+            <div class="bg-[#0f172a] border border-border rounded-xl p-6 text-center">
+              <div class="text-4xl font-bold gradient-text" id="statVisitors">0</div>
+              <div class="text-text-muted mt-2">总访问量</div>
+            </div>
+            <div class="bg-[#0f172a] border border-border rounded-xl p-6 text-center">
+              <div class="text-4xl font-bold gradient-text" id="statForms">0</div>
+              <div class="text-text-muted mt-2">表单提交</div>
+            </div>
+            <div class="bg-[#0f172a] border border-border rounded-xl p-6 text-center">
+              <div class="text-4xl font-bold gradient-text" id="statSubscribers">0</div>
+              <div class="text-text-muted mt-2">邮件订阅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 10. NEWSLETTER ===== -->
+<section class="py-24 px-4 bg-[#0b1120]">
+  <div class="max-w-xl mx-auto text-center fade-in">
+    <h2 class="text-3xl font-bold mb-4">订阅 <span class="gradient-text">OpenClaw</span> 更新</h2>
+    <p class="text-text-muted mb-8">获取最新版本、技能模块与功能更新通知</p>
+    <form onsubmit="subscribeNewsletter(event)" class="flex gap-3 max-w-md mx-auto">
+      <input type="email" id="newsletterEmail" required class="flex-1 bg-bg-card border border-border rounded-xl px-5 py-3.5 text-text-light focus:border-primary focus:outline-none transition" placeholder="your@email.com">
+      <button type="submit" class="btn-primary-gradient text-white px-6 py-3.5 rounded-xl font-semibold whitespace-nowrap">
+        <i class="fas fa-bell mr-1"></i> 订阅
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- ===== 11. FOOTER ===== -->
+<footer class="border-t border-border py-16 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+      <!-- Brand -->
+      <div>
+        <div class="text-xl font-bold text-text-light mb-4 flex items-center gap-2">
+          <span class="text-2xl">&#x1F99E;</span> OpenClaw AI
+        </div>
+        <p class="text-text-muted text-sm leading-relaxed mb-4">开源本地AI助手平台，让AI真正为你干活。数据不离设备，隐私完全可控。</p>
+        <p class="text-text-muted text-sm"><i class="fas fa-envelope mr-1"></i> rao5201@126.com</p>
+      </div>
+      <!-- 产品 -->
+      <div>
+        <h4 class="text-text-light font-semibold mb-4">产品</h4>
+        <ul class="space-y-2.5 text-text-muted text-sm">
+          <li><a href="#features" class="hover:text-text-light transition">功能</a></li>
+          <li><a href="#skills" class="hover:text-text-light transition">技能市场</a></li>
+          <li><a href="#deploy" class="hover:text-text-light transition">文档</a></li>
+          <li><a href="#deploy" class="hover:text-text-light transition">部署指南</a></li>
+        </ul>
+      </div>
+      <!-- 商务 -->
+      <div>
+        <h4 class="text-text-light font-semibold mb-4">商务</h4>
+        <ul class="space-y-2.5 text-text-muted text-sm">
+          <li><a href="#adSection" class="hover:text-text-light transition">广告招商</a></li>
+          <li><a href="#adForm" class="hover:text-text-light transition">联系我们</a></li>
+          <li><a href="#" class="hover:text-text-light transition">合作伙伴</a></li>
+        </ul>
+      </div>
+      <!-- 社区 -->
+      <div>
+        <h4 class="text-text-light font-semibold mb-4">社区</h4>
+        <ul class="space-y-2.5 text-text-muted text-sm">
+          <li><a href="https://github.com/openclaw-ai" target="_blank" class="hover:text-text-light transition"><i class="fab fa-github mr-1.5"></i>GitHub</a></li>
+          <li><a href="#" class="hover:text-text-light transition"><i class="fab fa-discord mr-1.5"></i>Discord</a></li>
+          <li><a href="#" class="hover:text-text-light transition"><i class="fab fa-twitter mr-1.5"></i>Twitter</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-border pt-8 text-center text-text-muted text-sm">
+      &copy; 2026 OpenClaw AI. All rights reserved. · rao5201@126.com
+    </div>
+  </div>
+</footer>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+// ==================== DATA ====================
+const DEFAULT_SKILLS = [
+  { id: 1, name: '数据分析师', icon: '📊', desc: 'Excel/CSV自动分析', installs: 3280, category: '数据' },
+  { id: 2, name: 'UI设计师', icon: '🎨', desc: '自动生成UI原型', installs: 2150, category: '设计' },
+  { id: 3, name: '邮件管家', icon: '📧', desc: '自动回复和分类', installs: 4520, category: '办公' },
+  { id: 4, name: 'SEO优化器', icon: '🔍', desc: '网站SEO自动优化', installs: 1890, category: '营销' },
+  { id: 5, name: 'App测试员', icon: '📱', desc: '自动化UI测试', installs: 1340, category: '开发' },
+  { id: 6, name: '财务助理', icon: '💰', desc: '发票识别和报表', installs: 2760, category: '财务' },
+  { id: 7, name: '内容创作者', icon: '📝', desc: 'AI写作和排版', installs: 5100, category: '内容' },
+  { id: 8, name: '安全巡检', icon: '🛡️', desc: '系统漏洞自动扫描', installs: 980, category: '安全' },
+];
+
+const DEFAULT_ADSLOTS = Array.from({ length: 18 }, (_, i) => {
+  const id = i + 1;
+  const taken = [5, 11, 14];
+  const advertisers = { 5: '星辰科技', 11: '蓝海数据', 14: '云端智能' };
+  return {
+    id,
+    position: `广告位 ${id}`,
+    status: taken.includes(id) ? 'taken' : 'available',
+    advertiser: advertisers[id] || ''
+  };
+});
+
+const DEFAULT_CONTACTS = [];
+
+// ==================== DATABASE LAYER ====================
+const SUPABASE_URL = '';
+const SUPABASE_ANON_KEY = '';
+
+let supabase = null;
+let dbMode = 'localStorage';
+
+let skills = [];
+let adSlots = [];
+let contacts = [];
+
+function initDB() {
+  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      dbMode = 'Supabase';
+      loadFromSupabase();
+    } catch (e) {
+      console.warn('Supabase init failed, falling back to localStorage', e);
+      loadFromLocalStorage();
+    }
+  } else {
+    loadFromLocalStorage();
+  }
+  document.getElementById('dbModeText').textContent = dbMode;
+}
+
+async function loadFromSupabase() {
+  try {
+    const { data: sk } = await supabase.from('skills').select('*');
+    skills = sk && sk.length ? sk : [...DEFAULT_SKILLS];
+
+    const { data: ad } = await supabase.from('adslots').select('*');
+    adSlots = ad && ad.length ? ad : [...DEFAULT_ADSLOTS];
+
+    const { data: ct } = await supabase.from('contacts').select('*');
+    contacts = ct || [];
+  } catch (e) {
+    console.warn('Supabase load failed, using defaults', e);
+    skills = [...DEFAULT_SKILLS];
+    adSlots = [...DEFAULT_ADSLOTS];
+    contacts = [];
+  }
+  renderAll();
+}
+
+function loadFromLocalStorage() {
+  const sk = localStorage.getItem('openclaw_skills');
+  skills = sk ? JSON.parse(sk) : [...DEFAULT_SKILLS];
+
+  const ad = localStorage.getItem('openclaw_adslots');
+  adSlots = ad ? JSON.parse(ad) : [...DEFAULT_ADSLOTS];
+
+  const ct = localStorage.getItem('openclaw_contacts');
+  contacts = ct ? JSON.parse(ct) : [];
+
+  renderAll();
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem('openclaw_skills', JSON.stringify(skills));
+  localStorage.setItem('openclaw_adslots', JSON.stringify(adSlots));
+  localStorage.setItem('openclaw_contacts', JSON.stringify(contacts));
+}
+
+async function saveToDB() {
+  saveToLocalStorage();
+  if (supabase) {
+    try {
+      await supabase.from('skills').upsert(skills);
+      await supabase.from('adslots').upsert(adSlots);
+      await supabase.from('contacts').upsert(contacts);
+    } catch (e) { console.warn('Supabase save error', e); }
+  }
+}
+
+// ==================== RENDER ====================
+function renderAll() {
+  renderSkills();
+  renderAdSlots();
+}
+
+function renderSkills() {
+  const grid = document.getElementById('skillsGrid');
+  grid.innerHTML = skills.map(s => `
+    <div class="bg-bg-card border border-border rounded-xl p-6 card-hover fade-in visible">
+      <div class="text-3xl mb-3">${s.icon}</div>
+      <h3 class="text-base font-bold text-text-light mb-1">${s.name}</h3>
+      <p class="text-text-muted text-sm mb-4">${s.desc}</p>
+      <div class="flex items-center justify-between">
+        <span class="text-text-muted text-xs"><i class="fas fa-download mr-1"></i>${s.installs.toLocaleString()} 次安装</span>
+        <button onclick="installSkill(${s.id})" class="bg-primary/10 text-primary hover:bg-primary/20 px-4 py-1.5 rounded-lg text-xs font-semibold transition">安装</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function installSkill(id) {
+  const s = skills.find(x => x.id === id);
+  if (s) {
+    s.installs++;
+    saveToDB();
+    renderSkills();
+    showToast(`${s.icon} ${s.name} 安装成功！`, 'success');
+  }
+}
+
+function renderAdSlots() {
+  const grid = document.getElementById('adSlotsGrid');
+  grid.innerHTML = adSlots.map(s => {
+    if (s.status === 'taken') {
+      return `<div class="ad-slot-taken rounded-xl p-5 text-center fade-in visible">
+        <div class="text-xs text-green-400 font-semibold mb-1">已售</div>
+        <div class="text-2xl font-bold text-text-light mb-1">${s.id}</div>
+        <div class="text-xs text-green-400 truncate">${s.advertiser}</div>
+      </div>`;
+    }
+    return `<div class="ad-slot-available rounded-xl p-5 text-center fade-in visible" onclick="document.getElementById('adForm').scrollIntoView({behavior:'smooth'})">
+      <div class="text-xs text-text-muted font-semibold mb-1">可预订</div>
+      <div class="text-2xl font-bold text-text-muted mb-1">${s.id}</div>
+      <div class="text-xs text-primary">10万/月</div>
+    </div>`;
+  }).join('');
+}
+
+// ==================== FORM ====================
+function submitAdForm(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const entry = {
+    id: Date.now(),
+    company: fd.get('company'),
+    contact: fd.get('contact'),
+    phone: fd.get('phone'),
+    email: fd.get('email'),
+    position: fd.get('position'),
+    duration: fd.get('duration'),
+    notes: fd.get('notes'),
+    time: new Date().toLocaleString('zh-CN'),
+    read: false
+  };
+  contacts.push(entry);
+  saveToDB();
+
+  // mailto backup
+  const subject = encodeURIComponent(`OpenClaw广告位咨询 - ${entry.company}`);
+  const body = encodeURIComponent(`公司: ${entry.company}\n联系人: ${entry.contact}\n电话: ${entry.phone}\n邮箱: ${entry.email}\n位置: ${entry.position}\n时长: ${entry.duration}\n备注: ${entry.notes}`);
+  window.open(`mailto:rao5201@126.com?subject=${subject}&body=${body}`, '_blank');
+
+  e.target.reset();
+  showToast('提交成功！我们将尽快联系您。', 'success');
+}
+
+// ==================== ADMIN ====================
+function showAdmin() {
+  document.getElementById('adminOverlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAdmin() {
+  document.getElementById('adminOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function adminAuth() {
+  const pwd = document.getElementById('adminPwd').value;
+  if (pwd === 'openclaw2026') {
+    document.getElementById('adminLogin').classList.add('hidden');
+    document.getElementById('adminContent').classList.remove('hidden');
+    renderAdminSkills();
+    renderAdminAdSlots();
+    renderAdminForms();
+    renderAdminStats();
+  } else {
+    showToast('密码错误', 'error');
+  }
+}
+
+function switchAdminTab(tab, el) {
+  document.querySelectorAll('[id^="adminTab-"]').forEach(t => t.classList.add('hidden'));
+  document.getElementById('adminTab-' + tab).classList.remove('hidden');
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function renderAdminSkills() {
+  const body = document.getElementById('adminSkillsBody');
+  body.innerHTML = skills.map(s => `<tr class="border-b border-border/50 hover:bg-white/5">
+    <td class="py-3 px-3 text-text-muted">${s.id}</td>
+    <td class="py-3 px-3 text-xl">${s.icon}</td>
+    <td class="py-3 px-3 text-text-light font-medium">${s.name}</td>
+    <td class="py-3 px-3 text-text-muted">${s.desc}</td>
+    <td class="py-3 px-3 text-text-muted">${s.installs}</td>
+    <td class="py-3 px-3">
+      <button onclick="editSkill(${s.id})" class="text-primary hover:text-primary-dark mr-2 text-xs"><i class="fas fa-edit"></i></button>
+      <button onclick="deleteSkill(${s.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>`).join('');
+}
+
+function addSkillPrompt() {
+  const name = prompt('技能名称:');
+  if (!name) return;
+  const icon = prompt('图标 (emoji):', '🔧') || '🔧';
+  const desc = prompt('描述:') || '';
+  const category = prompt('分类:', '通用') || '通用';
+  const id = skills.length ? Math.max(...skills.map(s => s.id)) + 1 : 1;
+  skills.push({ id, name, icon, desc, installs: 0, category });
+  saveToDB();
+  renderSkills();
+  renderAdminSkills();
+  showToast('技能已添加', 'success');
+}
+
+function editSkill(id) {
+  const s = skills.find(x => x.id === id);
+  if (!s) return;
+  const name = prompt('名称:', s.name);
+  if (name === null) return;
+  s.name = name || s.name;
+  s.icon = prompt('图标:', s.icon) || s.icon;
+  s.desc = prompt('描述:', s.desc) || s.desc;
+  saveToDB();
+  renderSkills();
+  renderAdminSkills();
+  showToast('技能已更新', 'success');
+}
+
+function deleteSkill(id) {
+  if (!confirm('确定删除该技能？')) return;
+  skills = skills.filter(s => s.id !== id);
+  saveToDB();
+  renderSkills();
+  renderAdminSkills();
+  showToast('技能已删除', 'info');
+}
+
+function renderAdminAdSlots() {
+  const body = document.getElementById('adminAdSlotsBody');
+  body.innerHTML = adSlots.map(s => `<tr class="border-b border-border/50 hover:bg-white/5">
+    <td class="py-3 px-3 text-text-muted">${s.id}</td>
+    <td class="py-3 px-3 text-text-light">${s.position}</td>
+    <td class="py-3 px-3"><span class="px-2 py-1 rounded text-xs font-medium ${s.status === 'taken' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}">${s.status === 'taken' ? '已售' : '可用'}</span></td>
+    <td class="py-3 px-3 text-text-muted">${s.advertiser || '-'}</td>
+    <td class="py-3 px-3">
+      <button onclick="toggleAdSlot(${s.id})" class="text-primary hover:text-primary-dark text-xs mr-2"><i class="fas fa-sync-alt"></i> 切换</button>
+      ${s.status === 'taken' ? `<button onclick="editAdvertiser(${s.id})" class="text-accent hover:text-accent/80 text-xs"><i class="fas fa-edit"></i></button>` : ''}
+    </td>
+  </tr>`).join('');
+}
+
+function toggleAdSlot(id) {
+  const s = adSlots.find(x => x.id === id);
+  if (!s) return;
+  if (s.status === 'available') {
+    const name = prompt('广告主名称:');
+    if (!name) return;
+    s.status = 'taken';
+    s.advertiser = name;
+  } else {
+    s.status = 'available';
+    s.advertiser = '';
+  }
+  saveToDB();
+  renderAdSlots();
+  renderAdminAdSlots();
+  showToast('广告位已更新', 'success');
+}
+
+function editAdvertiser(id) {
+  const s = adSlots.find(x => x.id === id);
+  if (!s) return;
+  const name = prompt('广告主名称:', s.advertiser);
+  if (name === null) return;
+  s.advertiser = name;
+  saveToDB();
+  renderAdSlots();
+  renderAdminAdSlots();
+}
+
+function renderAdminForms() {
+  const list = document.getElementById('adminFormsList');
+  if (!contacts.length) {
+    list.innerHTML = '<p class="text-text-muted text-center py-8">暂无表单提交</p>';
+    return;
+  }
+  list.innerHTML = contacts.slice().reverse().map(c => `
+    <div class="bg-[#0f172a] border border-border rounded-xl p-5 ${c.read ? 'opacity-60' : ''}">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <span class="text-text-light font-semibold">${c.company}</span>
+          <span class="text-text-muted text-xs ml-2">${c.time}</span>
+          ${!c.read ? '<span class="ml-2 px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full">新</span>' : ''}
+        </div>
+        <button onclick="markFormRead(${c.id})" class="text-text-muted hover:text-text-light text-xs">${c.read ? '已读' : '标为已读'}</button>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-2 text-sm text-text-muted">
+        <div><i class="fas fa-user mr-1"></i>${c.contact}</div>
+        <div><i class="fas fa-phone mr-1"></i>${c.phone}</div>
+        <div><i class="fas fa-envelope mr-1"></i>${c.email}</div>
+        <div><i class="fas fa-map-marker-alt mr-1"></i>${c.position || '未选择'}</div>
+        <div><i class="fas fa-clock mr-1"></i>${c.duration}</div>
+      </div>
+      ${c.notes ? `<div class="mt-2 text-sm text-text-muted"><i class="fas fa-sticky-note mr-1"></i>${c.notes}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function markFormRead(id) {
+  const c = contacts.find(x => x.id === id);
+  if (c) { c.read = true; saveToDB(); renderAdminForms(); }
+}
+
+function renderAdminStats() {
+  const visitors = parseInt(localStorage.getItem('openclaw_visitors') || '0');
+  document.getElementById('statVisitors').textContent = visitors.toLocaleString();
+  document.getElementById('statForms').textContent = contacts.length;
+  const subs = JSON.parse(localStorage.getItem('openclaw_subscribers') || '[]');
+  document.getElementById('statSubscribers').textContent = subs.length;
+}
+
+// ==================== EXPORT / IMPORT ====================
+function exportData() {
+  const data = { skills, adSlots, contacts, exported: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `openclaw-data-${Date.now()}.json`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('数据已导出', 'success');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.skills) skills = data.skills;
+      if (data.adSlots) adSlots = data.adSlots;
+      if (data.contacts) contacts = data.contacts;
+      saveToDB();
+      renderAll();
+      renderAdminSkills();
+      renderAdminAdSlots();
+      renderAdminForms();
+      renderAdminStats();
+      showToast('数据已导入', 'success');
+    } catch (err) {
+      showToast('导入失败：文件格式错误', 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ==================== NEWSLETTER ====================
+function subscribeNewsletter(e) {
+  e.preventDefault();
+  const email = document.getElementById('newsletterEmail').value.trim();
+  if (!email) return;
+  const subs = JSON.parse(localStorage.getItem('openclaw_subscribers') || '[]');
+  if (subs.includes(email)) {
+    showToast('该邮箱已订阅', 'info');
+    return;
+  }
+  subs.push(email);
+  localStorage.setItem('openclaw_subscribers', JSON.stringify(subs));
+  document.getElementById('newsletterEmail').value = '';
+  showToast('订阅成功！感谢关注 OpenClaw AI', 'success');
+}
+
+// ==================== UTILITIES ====================
+function copyToClipboard(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i>';
+    btn.style.color = '#10b981';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 2000);
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('已复制', 'success');
+  });
+}
+
+function showToast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>${msg}`;
+  document.getElementById('toastContainer').appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+}
+
+function closeBanner() {
+  const banner = document.getElementById('topBanner');
+  banner.style.display = 'none';
+  document.getElementById('mainNav').style.top = '0';
+}
+
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const icon = document.getElementById('menuIcon');
+  menu.classList.toggle('open');
+  icon.className = menu.classList.contains('open') ? 'fas fa-times' : 'fas fa-bars';
+}
+
+function incrementVisitor() {
+  let count = parseInt(localStorage.getItem('openclaw_visitors') || '0');
+  count++;
+  localStorage.setItem('openclaw_visitors', String(count));
+}
+
+// ==================== INTERSECTION OBSERVER ====================
+function initObserver() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        obs.unobserve(entry.target);
+      }
     });
-  </script>
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+  incrementVisitor();
+  initDB();
+  initObserver();
+
+  // Update nav sticky position based on banner
+  const banner = document.getElementById('topBanner');
+  const nav = document.getElementById('mainNav');
+  const updateNavTop = () => {
+    if (banner.style.display === 'none') {
+      nav.style.top = '0';
+    } else {
+      nav.style.top = banner.offsetHeight + 'px';
+    }
+  };
+  updateNavTop();
+  window.addEventListener('resize', updateNavTop);
+});
+</script>
 </body>
 </html>
